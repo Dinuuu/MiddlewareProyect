@@ -1,7 +1,12 @@
 package middleware.modelo;
 
 import java.io.Serializable;
+import java.rmi.RemoteException;
+import java.sql.Timestamp;
 import java.util.List;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 public class Perfil implements Serializable {
 
@@ -15,7 +20,7 @@ public class Perfil implements Serializable {
 	private String apellido;
 	private String direccionWeb;
 	private byte[] foto;
-	private List<Publicacion> publicaciones;
+	private SortedSet<Publicacion> publicaciones;
 	private boolean publico;
 
 	public Perfil(String nombreUsuario, String contraseña, String nombre,
@@ -28,6 +33,7 @@ public class Perfil implements Serializable {
 		this.direccionWeb = direccionWeb;
 		this.foto = foto;
 		this.publico = publico;
+		publicaciones = new TreeSet<>();
 	}
 
 	public String getContraseña() {
@@ -82,8 +88,19 @@ public class Perfil implements Serializable {
 		return nombreUsuario;
 	}
 
-	public List<Publicacion> getPublicaciones() {
+	public void setNombreUsuario(String nombreUsuario) {
+		this.nombreUsuario = nombreUsuario;
+	}
+
+	public SortedSet<Publicacion> getPublicaciones() {
 		return publicaciones;
 	}
 
+	void escribirPublicacion(String mensaje, Usuario desde, Usuario para)
+			throws RemoteException {
+
+		para.getPerfil().publicaciones.add(new Publicacion(desde, mensaje,
+				new Timestamp(System.currentTimeMillis())));
+
+	}
 }

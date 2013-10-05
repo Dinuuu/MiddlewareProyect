@@ -13,4 +13,7 @@ public interface ManagerDeSesion extends Remote {
 			throws RemoteException;
 
 	public boolean desconectarse(Usuario usu) throws RemoteException;
+
+	public boolean existeUsuario(String nombreUsuario) throws RemoteException;
+	
 }

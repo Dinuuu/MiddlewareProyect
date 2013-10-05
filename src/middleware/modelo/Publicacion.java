@@ -1,21 +1,27 @@
 package middleware.modelo;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 public class Publicacion extends Mensaje {
 
-
-	private List<Mensaje> respuestas= new ArrayList<Mensaje>();
+	private SortedSet<Mensaje> respuestas = new TreeSet<Mensaje>();
 
 	public Publicacion(Usuario usu, String mensaje, Timestamp horaDePublicacion) {
 		super(usu, mensaje, horaDePublicacion);
-		// TODO Auto-generated constructor stub
-	}
+ 	}
 
-	public List<Mensaje> getRespuestas() {
+	public SortedSet<Mensaje> getRespuestas() {
 		return respuestas;
 	}
+
+	public void responder(String mensaje, Usuario usuario) {
+
+		respuestas.add(new Mensaje(usuario, mensaje, new Timestamp(System
+				.currentTimeMillis())));
+	}
+
 	
+
 }
