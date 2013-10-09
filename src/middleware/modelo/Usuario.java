@@ -2,39 +2,124 @@ package middleware.modelo;
 
 import java.io.Serializable;
 import java.rmi.RemoteException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
-import middleware.rmi.interfaces.ManagerDePerfil;
 import middleware.rmi.interfaces.ManagerDeSesion;
 import middleware.rmi.interfaces.ManagerDeUsuario;
 
-public class Usuario implements Serializable, ManagerDeUsuario, ManagerDePerfil {
+public class Usuario implements Serializable, ManagerDeUsuario {
 
 	/**
 	 * 
 	 */
-	private ManagerDeSesion sesion;
 	private static final long serialVersionUID = 1L;
-	private List<Usuario> amigos = new ArrayList<Usuario>();
+	private List<ManagerDeUsuario> amigos = new ArrayList<ManagerDeUsuario>();
 	private List<Solicitud> solicitudes = new ArrayList<Solicitud>();
-	private Perfil perfil;
+	private String nombreUsuario;
+	private String contraseña;
+	private String nombre;
+	private String apellido;
+	private String direccionWeb;
+	private byte[] foto;
+	private SortedSet<Publicacion> publicaciones = new TreeSet<Publicacion>();
+	private boolean publico;
 
 	public Usuario(String nombreUsuario, String contraseña, String nombre,
-			String apellido, String direccionWeb, byte[] foto, boolean publico,
-			ManagerDeSesion sesion) {
+			String apellido, String direccionWeb, byte[] foto, boolean publico) {
 		super();
-		this.perfil = new Perfil(nombreUsuario, contraseña, nombre, apellido,
-				direccionWeb, foto, publico);
-		this.sesion = sesion;
+		this.nombreUsuario = nombreUsuario;
+		setContraseña(contraseña);
+		this.nombre = nombre;
+		this.apellido = apellido;
+		this.direccionWeb = direccionWeb;
+		this.foto = foto;
+		this.publico = publico;
+	}
+
+	public String getNombreUsuario() throws RemoteException{
+		return nombreUsuario;
+	}
+
+	public void setNombreUsuario(String nombreUsuario) {
+		this.nombreUsuario = nombreUsuario;
+	}
+
+	public String getNombre() throws RemoteException {
+		return nombre;
+	}
+
+	public void setNombre(String nombre) {
+		this.nombre = nombre;
+	}
+
+	public String getApellido() throws RemoteException {
+		return apellido;
+	}
+
+	public void setApellido(String apellido) {
+		this.apellido = apellido;
+	}
+
+	public String getDireccionWeb() throws RemoteException {
+		return direccionWeb;
+	}
+
+	public void setDireccionWeb(String direccionWeb) {
+		this.direccionWeb = direccionWeb;
+	}
+
+	public byte[] getFoto() throws RemoteException {
+		return foto;
+	}
+
+	public void setFoto(byte[] foto) {
+		this.foto = foto;
+	}
+
+	public boolean isPublico() throws RemoteException {
+		return publico;
+	}
+
+	public void setPublico(boolean publico) {
+		this.publico = publico;
+	}
+
+	public List<ManagerDeUsuario> getAmigos() throws RemoteException{
+		return amigos;
+	}
+
+	public String getContraseña() throws RemoteException {
+		return contraseña;
+	}
+
+	public SortedSet<Publicacion> getPublicaciones() throws RemoteException {
+		return publicaciones;
+	}
+
+	public void setContraseña(String contraseña) {
+		byte[] bytesDeContraseña = contraseña.getBytes();
+
+		MessageDigest md = null;
+		try {
+			md = MessageDigest.getInstance("MD5");
+		} catch (NoSuchAlgorithmException e) {
+			System.out.println("No Existe MD5");
+			e.printStackTrace();
+		}
+
+		byte[] contraseñaHASH = md.digest(bytesDeContraseña);
+
+		this.contraseña = contraseñaHASH.toString();
 	}
 
 	public List<Solicitud> getSolicitudes() throws RemoteException {
 		return solicitudes;
-	}
-
-	public Perfil getPerfil() throws RemoteException {
-		return perfil;
 	}
 
 	@Override
@@ -59,7 +144,7 @@ public class Usuario implements Serializable, ManagerDeUsuario, ManagerDePerfil 
 
 	}
 
-	private boolean esAmigo(Usuario usuario) {
+	public boolean esAmigo(Usuario usuario) throws RemoteException{
 
 		if (usuario.amigos.contains(this))
 			return true;
@@ -67,23 +152,22 @@ public class Usuario implements Serializable, ManagerDeUsuario, ManagerDePerfil 
 	}
 
 	@Override
-	public List<Usuario> listaAmigos() throws RemoteException {
-		return amigos;
-	}
-
-	@Override
 	public boolean cambiarDatos(String nombre, String apellido,
 			String direccionWeb, byte[] foto, boolean publico,
-			String nombreUsuario) throws RemoteException {
+			String nombreUsuario, ManagerDeSesion sesion)
+			throws RemoteException {
 
-		if (sesion.existeUsuario(nombreUsuario))
-			return false;
-		perfil.setNombreUsuario(nombreUsuario);
-		perfil.setNombre(nombre);
-		perfil.setApellido(apellido);
-		perfil.setDireccionWeb(direccionWeb);
-		perfil.setFoto(foto);
-		perfil.setPublico(publico);
+		if (!getNombreUsuario().equals(nombreUsuario)
+				&& !sesion.existeUsuario(nombreUsuario)
+				|| getNombreUsuario().equals(nombreUsuario)) {
+			setNombreUsuario(nombreUsuario);
+			setNombre(nombre);
+			setApellido(apellido);
+			setDireccionWeb(direccionWeb);
+			setFoto(foto);
+			setPublico(publico);
+			return true;
+		}
 		return false;
 	}
 
@@ -104,11 +188,23 @@ public class Usuario implements Serializable, ManagerDeUsuario, ManagerDePerfil 
 			String contraseñaNueva, String contraseñaNuevaRep)
 			throws RemoteException {
 
-		if (!contraseñaVieja.equals(perfil.getContraseña())
+		byte[] bytesDeContraseña = contraseñaVieja.getBytes();
+
+		MessageDigest md = null;
+		try {
+			md = MessageDigest.getInstance("MD5");
+		} catch (NoSuchAlgorithmException e) {
+			System.out.println("No Existe MD5");
+			e.printStackTrace();
+		}
+
+		byte[] contraseñaViejaHASH = md.digest(bytesDeContraseña);
+
+		if (!contraseñaViejaHASH.equals(getContraseña())
 				|| !contraseñaNueva.equals(contraseñaNuevaRep))
 			return false;
 
-		perfil.setContraseña(contraseñaNueva);
+		setContraseña(contraseñaNueva);
 		return true;
 	}
 
@@ -119,7 +215,8 @@ public class Usuario implements Serializable, ManagerDeUsuario, ManagerDePerfil 
 		if (!this.esAmigo(usu))
 			return false;
 
-		usu.perfil.escribirPublicacion(mensaje, this, usu);
+		usu.publicaciones.add(new Publicacion(this, mensaje, new Timestamp(
+				System.currentTimeMillis())));
 		return true;
 	}
 
