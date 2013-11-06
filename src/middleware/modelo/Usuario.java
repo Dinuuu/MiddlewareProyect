@@ -42,7 +42,7 @@ public class Usuario implements Serializable, ManagerDeUsuario {
 		this.publico = publico;
 	}
 
-	public String getNombreUsuario() throws RemoteException{
+	public String getNombreUsuario() throws RemoteException {
 		return nombreUsuario;
 	}
 
@@ -90,7 +90,7 @@ public class Usuario implements Serializable, ManagerDeUsuario {
 		this.publico = publico;
 	}
 
-	public List<ManagerDeUsuario> getAmigos() throws RemoteException{
+	public List<ManagerDeUsuario> getAmigos() throws RemoteException {
 		return amigos;
 	}
 
@@ -144,7 +144,7 @@ public class Usuario implements Serializable, ManagerDeUsuario {
 
 	}
 
-	public boolean esAmigo(Usuario usuario) throws RemoteException{
+	public boolean esAmigo(Usuario usuario) throws RemoteException {
 
 		if (usuario.amigos.contains(this))
 			return true;
@@ -226,6 +226,16 @@ public class Usuario implements Serializable, ManagerDeUsuario {
 
 		p.responder(mensaje, this);
 		return true;
+	}
+
+	public boolean equals(Object o) {
+		if (o.getClass() != getClass())
+			return false;
+		try {
+			return getNombreUsuario().equals(((Usuario) o).getNombreUsuario());
+		} catch (RemoteException e) {
+			return false;
+		}
 	}
 
 }
