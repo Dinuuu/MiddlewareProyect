@@ -2,9 +2,9 @@ package middleware.modelo;
 
 import java.io.Serializable;
 import java.rmi.RemoteException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import middleware.rmi.interfaces.Buscador;
@@ -20,20 +20,21 @@ public class ManagerDeSesionImpl implements Serializable, ManagerDeSesion,
 	private static final long serialVersionUID = 1L;
 
 	Map<String, ManagerDeUsuario> usuarios = new HashMap<String, ManagerDeUsuario>();
+	List<String> conectados = new ArrayList<String>();
 
 	@Override
 	public synchronized boolean registrarse(String nombreUsuario,
 			String contraseña, String nombre, String apellido,
-			String direccionWeb, byte[] foto, boolean publico)
-			throws RemoteException {
+			String direccionWeb, boolean publico) throws RemoteException {
 
 		if (existeUsuario(nombreUsuario))
 			return false;
 
 		ManagerDeUsuario usu = new Usuario(nombreUsuario, contraseña, nombre,
-				apellido, direccionWeb, foto, publico);
+				apellido, direccionWeb, publico);
 
 		usuarios.put(nombreUsuario, usu);
+		conectados.add(usu.getNombreUsuario());
 
 		return true;
 	}
@@ -45,23 +46,12 @@ public class ManagerDeSesionImpl implements Serializable, ManagerDeSesion,
 		if (!usuarios.containsKey(nombreUsu))
 			return null;
 
-		byte[] bytesDeContraseña = contraseña.getBytes();
-
-		MessageDigest md = null;
-		try {
-			md = MessageDigest.getInstance("MD5");
-		} catch (NoSuchAlgorithmException e) {
-			System.out.println("No Existe MD5");
-			e.printStackTrace();
-		}
-
-		byte[] contraseñaHASH = md.digest(bytesDeContraseña);
-
 		ManagerDeUsuario resp = usuarios.get(nombreUsu);
 
-		if (contraseñaHASH.toString().equals(resp.getContraseña()))
+		if (contraseña.equals(resp.getContraseña())) {
+			conectados.add(resp.getNombreUsuario());
 			return resp;
-		else
+		} else
 			return null;
 
 	}
@@ -69,7 +59,9 @@ public class ManagerDeSesionImpl implements Serializable, ManagerDeSesion,
 	@Override
 	public synchronized boolean desconectarse(ManagerDeUsuario usu)
 			throws RemoteException {
-		// TODO Auto-generated method stub
+		usuarios.remove(usu.getNombreUsuario());
+		usuarios.put(usu.getNombreUsuario(), usu);
+		conectados.remove(usu.getNombreUsuario());
 		return false;
 	}
 
@@ -90,6 +82,14 @@ public class ManagerDeSesionImpl implements Serializable, ManagerDeSesion,
 	public ManagerDeUsuario getUsuario(String nombreUsuario)
 			throws RemoteException {
 		return usuarios.get(nombreUsuario);
+	}
+
+	@Override
+	public synchronized void cambiarNombreUsuario(String nombreUsuarioViejo,
+			String nombreUsuarioNuevo) throws RemoteException {
+
+		ManagerDeUsuario usu = usuarios.remove(nombreUsuarioViejo);
+		usuarios.put(nombreUsuarioNuevo, usu);
 	}
 
 }

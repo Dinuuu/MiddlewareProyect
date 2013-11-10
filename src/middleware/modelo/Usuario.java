@@ -31,7 +31,7 @@ public class Usuario implements Serializable, ManagerDeUsuario {
 	private boolean publico;
 
 	public Usuario(String nombreUsuario, String contraseña, String nombre,
-			String apellido, String direccionWeb, byte[] foto, boolean publico) {
+			String apellido, String direccionWeb, boolean publico) {
 		super();
 		this.nombreUsuario = nombreUsuario;
 		setContraseña(contraseña);
@@ -103,19 +103,8 @@ public class Usuario implements Serializable, ManagerDeUsuario {
 	}
 
 	public void setContraseña(String contraseña) {
-		byte[] bytesDeContraseña = contraseña.getBytes();
 
-		MessageDigest md = null;
-		try {
-			md = MessageDigest.getInstance("MD5");
-		} catch (NoSuchAlgorithmException e) {
-			System.out.println("No Existe MD5");
-			e.printStackTrace();
-		}
-
-		byte[] contraseñaHASH = md.digest(bytesDeContraseña);
-
-		this.contraseña = contraseñaHASH.toString();
+		this.contraseña = contraseña;
 	}
 
 	public List<Solicitud> getSolicitudes() throws RemoteException {
@@ -123,48 +112,53 @@ public class Usuario implements Serializable, ManagerDeUsuario {
 	}
 
 	@Override
-	public boolean peticionAmistad(Usuario usu) throws RemoteException {
+	public boolean peticionAmistad(ManagerDeUsuario usu) throws RemoteException {
 
 		if (usu.esAmigo(this))
 			return false;
 
-		return agregarSolicitud(usu);
+		return agregarSolicitud((Usuario) usu);
 
 	}
 
-	private boolean agregarSolicitud(Usuario usu) {
-		Solicitud solici = new Solicitud(this);
-		Solicitud aux = new Solicitud(usu);
+	private boolean agregarSolicitud(Usuario usu) throws RemoteException {
 
-		if (usu.solicitudes.contains(solici) || usu.solicitudes.contains(aux))
+		if (usu.existeSolicitud(this) || existeSolicitud(usu))
 			return false;
 
-		usu.solicitudes.add(solici);
+		usu.solicitudes.add(new Solicitud(this));
 		return true;
 
 	}
 
-	public boolean esAmigo(Usuario usuario) throws RemoteException {
+	private boolean existeSolicitud(Usuario usuario) throws RemoteException {
+		for (Solicitud s : solicitudes) {
+			if (s.getUsu().getNombreUsuario()
+					.equals(usuario.getNombreUsuario()))
+				return true;
+		}
+		return false;
+	}
 
-		if (usuario.amigos.contains(this))
+	public boolean esAmigo(ManagerDeUsuario usuario) throws RemoteException {
+
+		if (usuario.getAmigos().contains(this))
 			return true;
 		return false;
 	}
 
 	@Override
 	public boolean cambiarDatos(String nombre, String apellido,
-			String direccionWeb, byte[] foto, boolean publico,
-			String nombreUsuario, ManagerDeSesion sesion)
-			throws RemoteException {
+			String direccionWeb, boolean publico, String nombreUsuario,
+			ManagerDeSesion sesion) throws RemoteException {
 
-		if (!getNombreUsuario().equals(nombreUsuario)
-				&& !sesion.existeUsuario(nombreUsuario)
+		if ((!getNombreUsuario().equals(nombreUsuario) && !sesion
+				.existeUsuario(nombreUsuario))
 				|| getNombreUsuario().equals(nombreUsuario)) {
 			setNombreUsuario(nombreUsuario);
 			setNombre(nombre);
 			setApellido(apellido);
 			setDireccionWeb(direccionWeb);
-			setFoto(foto);
 			setPublico(publico);
 			return true;
 		}
@@ -178,7 +172,7 @@ public class Usuario implements Serializable, ManagerDeUsuario {
 			return false;
 
 		amigos.add(s.getUsu());
-		s.getUsu().amigos.add(this);
+		((Usuario) s.getUsu()).amigos.add(this);
 		return true;
 
 	}
@@ -188,19 +182,7 @@ public class Usuario implements Serializable, ManagerDeUsuario {
 			String contraseñaNueva, String contraseñaNuevaRep)
 			throws RemoteException {
 
-		byte[] bytesDeContraseña = contraseñaVieja.getBytes();
-
-		MessageDigest md = null;
-		try {
-			md = MessageDigest.getInstance("MD5");
-		} catch (NoSuchAlgorithmException e) {
-			System.out.println("No Existe MD5");
-			e.printStackTrace();
-		}
-
-		byte[] contraseñaViejaHASH = md.digest(bytesDeContraseña);
-
-		if (!contraseñaViejaHASH.equals(getContraseña())
+		if (!contraseñaVieja.equals(getContraseña())
 				|| !contraseñaNueva.equals(contraseñaNuevaRep))
 			return false;
 
@@ -209,14 +191,14 @@ public class Usuario implements Serializable, ManagerDeUsuario {
 	}
 
 	@Override
-	public boolean escribirPublicacion(String mensaje, Usuario usu)
+	public boolean escribirPublicacion(String mensaje, ManagerDeUsuario usu)
 			throws RemoteException {
 
 		if (!this.esAmigo(usu))
 			return false;
 
-		usu.publicaciones.add(new Publicacion(this, mensaje, new Timestamp(
-				System.currentTimeMillis())));
+		((Usuario) usu).publicaciones.add(new Publicacion(this, mensaje,
+				new Timestamp(System.currentTimeMillis())));
 		return true;
 	}
 
@@ -236,6 +218,13 @@ public class Usuario implements Serializable, ManagerDeUsuario {
 		} catch (RemoteException e) {
 			return false;
 		}
+	}
+
+	@Override
+	public void declinarSolicitud(Solicitud s) throws RemoteException {
+
+		solicitudes.remove(s);
+
 	}
 
 }

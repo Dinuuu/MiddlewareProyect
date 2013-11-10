@@ -8,8 +8,8 @@ import middleware.modelo.Usuario;
 public interface ManagerDeSesion extends Remote {
 
 	public boolean registrarse(String nombreUsuario, String contraseña,
-			String nombre, String apellido, String direccionWeb, byte[] foto,
-			boolean publico) throws RemoteException;
+			String nombre, String apellido, String direccionWeb, boolean publico)
+			throws RemoteException;
 
 	public ManagerDeUsuario conectarse(String nombreUsu, String contraseña)
 			throws RemoteException;
@@ -21,4 +21,6 @@ public interface ManagerDeSesion extends Remote {
 	public ManagerDeUsuario getUsuario(String nombreUsuario)
 			throws RemoteException;
 
+	public void cambiarNombreUsuario(String nombreUsuarioViejo,
+			String nombreUsuarioNuevo) throws RemoteException;
 }

@@ -7,24 +7,22 @@ import java.util.SortedSet;
 
 import middleware.modelo.Publicacion;
 import middleware.modelo.Solicitud;
-import middleware.modelo.Usuario;
 
 public interface ManagerDeUsuario extends Remote {
 
-	public boolean peticionAmistad(Usuario usu) throws RemoteException;
+	public boolean peticionAmistad(ManagerDeUsuario usu) throws RemoteException;
 
 	public boolean aceptarSolicitud(Solicitud s) throws RemoteException;
 
-	public boolean escribirPublicacion(String mensaje, Usuario usu)
+	public boolean escribirPublicacion(String mensaje, ManagerDeUsuario usu)
 			throws RemoteException;
 
 	public boolean responderPublicacion(Publicacion p, String mensaje)
 			throws RemoteException;
 
 	public boolean cambiarDatos(String nombre, String apellido,
-			String direccionWeb, byte[] foto, boolean publico,
-			String nombreUsuario, ManagerDeSesion sesion)
-			throws RemoteException;
+			String direccionWeb, boolean publico, String nombreUsuario,
+			ManagerDeSesion sesion) throws RemoteException;
 
 	public boolean cambiarContraseña(String contraseñaVieja,
 			String contraseñaNueva, String contraseñaNuevaRep)
@@ -36,7 +34,7 @@ public interface ManagerDeUsuario extends Remote {
 
 	public String getApellido() throws RemoteException;
 
-	public boolean esAmigo(Usuario usuario) throws RemoteException;
+	public boolean esAmigo(ManagerDeUsuario usuario) throws RemoteException;
 
 	public List<Solicitud> getSolicitudes() throws RemoteException;
 
@@ -51,4 +49,6 @@ public interface ManagerDeUsuario extends Remote {
 	public String getDireccionWeb() throws RemoteException;
 
 	public List<ManagerDeUsuario> getAmigos() throws RemoteException;
+
+	public void declinarSolicitud(Solicitud s) throws RemoteException;
 }

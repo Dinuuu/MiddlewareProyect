@@ -1,16 +1,29 @@
 package middleware.modelo;
 
-public class Solicitud {
-	private Usuario usu;
+import java.rmi.RemoteException;
 
-	public Solicitud(Usuario usu) {
+import middleware.rmi.interfaces.ManagerDeUsuario;
+
+public class Solicitud {
+	private ManagerDeUsuario usu;
+
+	public Solicitud(ManagerDeUsuario usu) {
 		super();
 		this.usu = usu;
 	}
 
-	public Usuario getUsu() {
+	public ManagerDeUsuario getUsu() {
 		return usu;
 	}
-	
-	
+
+	@Override
+	public boolean equals(Object o) {
+		try {
+			return ((Solicitud) o).getUsu().getNombreUsuario()
+					.equals(usu.getNombreUsuario());
+		} catch (RemoteException e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
 }

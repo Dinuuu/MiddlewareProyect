@@ -6,7 +6,6 @@ import java.awt.event.KeyEvent;
 import java.rmi.RemoteException;
 
 import javax.swing.JButton;
-import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -28,13 +27,14 @@ public class Menu extends JMenuBar implements ActionListener {
 	private JMenuItem salir;
 	private JMenuItem editarInformacion;
 	private JMenuItem ir;
-	private JMenuItem solicitudes;
+	private JMenuItem misSolicitudes;
+	private JMenuItem enviarSolicitud;
 	private JMenuItem irAUltimas;
 	private JButton buscar;
+	private JTextField nombreUsuario;
+	private App parent;
 
-	private JFrame parent;
-
-	public Menu(JFrame parent, Buscador buscador, ManagerDeSesion sesion,
+	public Menu(App parent, Buscador buscador, ManagerDeSesion sesion,
 			ManagerDeUsuario usuario) {
 		super();
 		this.parent = parent;
@@ -52,6 +52,7 @@ public class Menu extends JMenuBar implements ActionListener {
 
 		desconectarse = new JMenuItem("Desconectarse");
 		desconectarse.addActionListener(this);
+		desconectarse.setEnabled(false);
 
 		salir = new JMenuItem("Salir");
 		salir.setMnemonic(KeyEvent.VK_E);
@@ -68,37 +69,42 @@ public class Menu extends JMenuBar implements ActionListener {
 		JMenu perfil = new JMenu("Perfil");
 		editarInformacion = new JMenuItem("Editar Informacion...");
 		editarInformacion.addActionListener(this);
+		editarInformacion.setEnabled(false);
+
 		ir = new JMenuItem("Ir a mi perfil");
 		ir.addActionListener(this);
-
-		solicitudes = new JMenuItem("Ver mis Solicitudes");
-		solicitudes.addActionListener(this);
+		ir.setEnabled(false);
 
 		perfil.add(editarInformacion);
 		perfil.addSeparator();
 		perfil.add(ir);
 
-		perfil.add(solicitudes);
-
 		JMenu ultimasNoticias = new JMenu("Ultimas Noticias");
 		irAUltimas = new JMenuItem("ir");
+		irAUltimas.setEnabled(false);
 
 		ultimasNoticias.add(irAUltimas);
 
-		JTextField nombreUsuario = new JTextField("Buscar");
-		buscar = new JButton("Buscar");
-		buscar.addActionListener(new ActionListener() {
+		JMenu solicitudes = new JMenu("Solicitudes");
+		misSolicitudes = new JMenuItem("Ver mis Solicitudes");
+		misSolicitudes.addActionListener(this);
+		misSolicitudes.setEnabled(false);
 
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				// getBuscador().buscar(nombreUsuario.getText());
-				// TODO VER COMO HACER CON ESTO
-			}
-		});
+		enviarSolicitud = new JMenuItem("Enviar Solicitud...");
+		enviarSolicitud.addActionListener(this);
+		enviarSolicitud.setEnabled(false);
+
+		solicitudes.add(misSolicitudes);
+		solicitudes.add(enviarSolicitud);
+
+		nombreUsuario = new JTextField();
+		buscar = new JButton("Buscar");
+		buscar.addActionListener(this);
 
 		add(file);
 		add(perfil);
 		add(ultimasNoticias);
+		add(solicitudes);
 		add(nombreUsuario);
 		add(buscar);
 
@@ -111,32 +117,44 @@ public class Menu extends JMenuBar implements ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 
-		Object source = e.getSource();
+		try {
+			Object source = e.getSource();
 
-		if (source == registrarse)
-			handleRegistro();
-		else if (source == conectarse)
-			handleConeccion();
-		else if (source == desconectarse)
-			handleDesconeccion();
-		else if (source == salir)
-			handleSalir();
-		else if (source == editarInformacion)
-			handleEdicionInformacion();
-		else if (source == ir)
-			handlePerfil();
-		else if (source == solicitudes)
-			handleSolicitudes();
-		else if (source == irAUltimas)
-			handleUltimasNoticias();
-		else if (source == buscar)
-			handleBusqueda();
-		else
-			System.out.println("ME OLVIDE DE ALGUNO");
+			if (source == registrarse)
+				handleRegistro();
+			else if (source == conectarse)
+				handleConeccion();
+			else if (source == desconectarse)
+				handleDesconeccion();
+			else if (source == salir)
+				handleSalir();
+			else if (source == editarInformacion)
+				handleEdicionInformacion();
+			else if (source == ir)
+				handlePerfil();
+			else if (source == misSolicitudes)
+				handleSolicitudes();
+			else if (source == irAUltimas)
+				handleUltimasNoticias();
+			else if (source == buscar)
+				handleBusqueda();
+			else if (source == enviarSolicitud)
+				handleEnviarSolicitud();
+			else
+				System.out.println("ME OLVIDE DE ALGUNO");
+		} catch (RemoteException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 	}
 
-	private void handleBusqueda() {
-		// TODO Auto-generated method stub
+	private void handleEnviarSolicitud() {
+		new EnviarSolicitudDialog(parent, sesion, usuarioConectado);
+	}
+
+	private void handleBusqueda() throws RemoteException {
+		ManagerDeUsuario usu = buscador.buscar(nombreUsuario.getText());
+		new Perfil(parent, usu);
 
 	}
 
@@ -145,41 +163,56 @@ public class Menu extends JMenuBar implements ActionListener {
 
 	}
 
-	private void handleSolicitudes() {
-		// TODO Auto-generated method stub
+	private void handleSolicitudes() throws RemoteException {
+
+		parent.getContentPane().add(new MisSolicitudes(usuarioConectado));
 
 	}
 
-	private void handlePerfil() {
-		// TODO Auto-generated method stub
+	private void handlePerfil() throws RemoteException {
+
+		new Perfil(parent, usuarioConectado);
 
 	}
 
-	private void handleEdicionInformacion() {
-		// TODO Auto-generated method stub
+	private void handleEdicionInformacion() throws RemoteException {
+
+		new ModificacionForm(parent, usuarioConectado, sesion);
 
 	}
 
-	private void handleSalir() {
+	private void handleSalir() throws RemoteException {
+
+		sesion.desconectarse(usuarioConectado);
 		System.exit(0);
+
 	}
 
-	private void handleDesconeccion() {
-		try {
-			sesion.desconectarse(usuarioConectado);
-			setUsuario(null);
-		} catch (RemoteException e1) {
-			e1.printStackTrace();
-		}
+	private void handleDesconeccion() throws RemoteException {
+
+		sesion.desconectarse(usuarioConectado);
+		setUsuario(null);
+		parent.setUsu(null);
+		changeButtonStatus();
 
 	}
 
 	private void handleConeccion() {
-		// TODO Auto-generated method stub
-
+		new ConeccionForm(parent, sesion, this);
 	}
 
 	private void handleRegistro() {
 		new AltaForm(parent, sesion, this);
+	}
+
+	void changeButtonStatus() {
+		registrarse.setEnabled(!registrarse.isEnabled());
+		conectarse.setEnabled(!conectarse.isEnabled());
+		desconectarse.setEnabled(!desconectarse.isEnabled());
+		editarInformacion.setEnabled(!editarInformacion.isEnabled());
+		ir.setEnabled(!ir.isEnabled());
+		misSolicitudes.setEnabled(!misSolicitudes.isEnabled());
+		enviarSolicitud.setEnabled(!enviarSolicitud.isEnabled());
+		irAUltimas.setEnabled(!irAUltimas.isEnabled());
 	}
 }
