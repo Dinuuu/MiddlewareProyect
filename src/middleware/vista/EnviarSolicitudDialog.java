@@ -1,6 +1,7 @@
 package middleware.vista;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.rmi.RemoteException;
@@ -17,15 +18,21 @@ import middleware.rmi.interfaces.ManagerDeUsuario;
 
 public class EnviarSolicitudDialog extends JDialog implements ActionListener {
 
-	private static int MAX_LENGHT = 40;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private static int MAX_LENGHT = 20;
 	JButton enviarSolicitud;
 	JTextField nombreUsuario;
 	ManagerDeSesion sesion;
 	ManagerDeUsuario usuarioConectado;
+	App owner;
 
-	public EnviarSolicitudDialog(JFrame owner, ManagerDeSesion sesion,
+	public EnviarSolicitudDialog(App owner, ManagerDeSesion sesion,
 			ManagerDeUsuario usu) {
 		super(owner, "Enviar Solicitud", true);
+		this.owner = owner;
 		this.sesion = sesion;
 		this.usuarioConectado = usu;
 		enviarSolicitud = new JButton("Enviar solicitud");
@@ -48,8 +55,8 @@ public class EnviarSolicitudDialog extends JDialog implements ActionListener {
 		panelPrincipal.add(panelCentral);
 
 		add(panelPrincipal);
-		
-		pack();
+
+		setPreferredSize(new Dimension(400, 200));
 		setSize(getPreferredSize());
 		setVisible(true);
 
@@ -63,13 +70,24 @@ public class EnviarSolicitudDialog extends JDialog implements ActionListener {
 					.getText());
 			if (usuario == null
 					|| usuario.getNombreUsuario().equals(
-							usuarioConectado.getNombreUsuario()))
+							usuarioConectado.getNombreUsuario())) {
+				new ErrorDialog(owner,
+						"No puedes enviarle peticion a ese usuario");
 				return;
-			usuarioConectado.peticionAmistad(usuario);
+			}
+
+			if (!usuarioConectado.peticionAmistad(usuario)) {
+				new ErrorDialog(owner,
+						"Ya eres amigo de ese usuario o ya existe una solicitud pendiente");
+
+				return;
+			}
 			setVisible(false);
 			dispose();
 		} catch (RemoteException e1) {
-			e1.printStackTrace();
+			new ErrorDialog(owner,
+					"Se ha producido un error, intentelo nuevamente en unos minutos");
+
 		}
 	}
 

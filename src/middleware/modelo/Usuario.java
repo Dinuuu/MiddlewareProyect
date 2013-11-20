@@ -1,9 +1,9 @@
 package middleware.modelo;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 import java.rmi.RemoteException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,19 +26,20 @@ public class Usuario implements Serializable, ManagerDeUsuario {
 	private String nombre;
 	private String apellido;
 	private String direccionWeb;
-	private byte[] foto;
+	private File foto;
 	private SortedSet<Publicacion> publicaciones = new TreeSet<Publicacion>();
 	private boolean publico;
 
 	public Usuario(String nombreUsuario, String contraseña, String nombre,
-			String apellido, String direccionWeb, boolean publico) {
+			String apellido, String direccionWeb, boolean publico)
+			throws IOException {
 		super();
 		this.nombreUsuario = nombreUsuario;
 		setContraseña(contraseña);
 		this.nombre = nombre;
 		this.apellido = apellido;
 		this.direccionWeb = direccionWeb;
-		this.foto = foto;
+		this.foto = new File("./default.jpg");
 		this.publico = publico;
 	}
 
@@ -74,12 +75,8 @@ public class Usuario implements Serializable, ManagerDeUsuario {
 		this.direccionWeb = direccionWeb;
 	}
 
-	public byte[] getFoto() throws RemoteException {
+	public File getFoto() throws RemoteException {
 		return foto;
-	}
-
-	public void setFoto(byte[] foto) {
-		this.foto = foto;
 	}
 
 	public boolean isPublico() throws RemoteException {
@@ -117,21 +114,23 @@ public class Usuario implements Serializable, ManagerDeUsuario {
 		if (usu.esAmigo(this))
 			return false;
 
-		return agregarSolicitud((Usuario) usu);
+		return agregarSolicitud(usu);
 
 	}
 
-	private boolean agregarSolicitud(Usuario usu) throws RemoteException {
+	private boolean agregarSolicitud(ManagerDeUsuario usu)
+			throws RemoteException {
 
 		if (usu.existeSolicitud(this) || existeSolicitud(usu))
 			return false;
 
-		usu.solicitudes.add(new Solicitud(this));
+		usu.añadirSolicitud(new Solicitud(this));
 		return true;
 
 	}
 
-	private boolean existeSolicitud(Usuario usuario) throws RemoteException {
+	public boolean existeSolicitud(ManagerDeUsuario usuario)
+			throws RemoteException {
 		for (Solicitud s : solicitudes) {
 			if (s.getUsu().getNombreUsuario()
 					.equals(usuario.getNombreUsuario()))
@@ -142,8 +141,11 @@ public class Usuario implements Serializable, ManagerDeUsuario {
 
 	public boolean esAmigo(ManagerDeUsuario usuario) throws RemoteException {
 
-		if (usuario.getAmigos().contains(this))
-			return true;
+		for (ManagerDeUsuario u : amigos) {
+			if (u.getNombreUsuario().equals(usuario.getNombreUsuario())) {
+				return true;
+			}
+		}
 		return false;
 	}
 
@@ -171,8 +173,9 @@ public class Usuario implements Serializable, ManagerDeUsuario {
 		if (esAmigo(s.getUsu()))
 			return false;
 
-		amigos.add(s.getUsu());
-		((Usuario) s.getUsu()).amigos.add(this);
+		agregarAmigo(s.getUsu());
+		s.getUsu().agregarAmigo(this);
+		eliminarSolicitud(s);
 		return true;
 
 	}
@@ -194,12 +197,20 @@ public class Usuario implements Serializable, ManagerDeUsuario {
 	public boolean escribirPublicacion(String mensaje, ManagerDeUsuario usu)
 			throws RemoteException {
 
-		if (!this.esAmigo(usu))
-			return false;
+		if (!this.getNombreUsuario().equals(usu.getNombreUsuario())
+				&& !this.esAmigo(usu)) {
 
-		((Usuario) usu).publicaciones.add(new Publicacion(this, mensaje,
-				new Timestamp(System.currentTimeMillis())));
+			return false;
+		}
+		usu.añadirPublicacion(new Publicacion(this, mensaje, new Timestamp(
+				System.currentTimeMillis())));
 		return true;
+	}
+
+	@Override
+	public void añadirPublicacion(Publicacion pub) throws RemoteException {
+		publicaciones.add(pub);
+
 	}
 
 	@Override
@@ -223,8 +234,30 @@ public class Usuario implements Serializable, ManagerDeUsuario {
 	@Override
 	public void declinarSolicitud(Solicitud s) throws RemoteException {
 
-		solicitudes.remove(s);
+		eliminarSolicitud(s);
 
 	}
 
+	@Override
+	public void cambiarFoto(File bimg) throws RemoteException {
+
+		this.foto = bimg;
+	}
+
+	@Override
+	public void añadirSolicitud(Solicitud solici) throws RemoteException {
+		solicitudes.add(solici);
+	}
+
+	@Override
+	public void agregarAmigo(ManagerDeUsuario usu) throws RemoteException {
+		amigos.add(usu);
+
+	}
+
+	@Override
+	public void eliminarSolicitud(Solicitud s) throws RemoteException {
+
+		solicitudes.remove(s);
+	}
 }

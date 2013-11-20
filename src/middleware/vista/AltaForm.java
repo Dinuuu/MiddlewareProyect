@@ -1,8 +1,10 @@
 package middleware.vista;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.rmi.RemoteException;
 
 import javax.swing.ButtonGroup;
@@ -20,7 +22,7 @@ import middleware.rmi.interfaces.ManagerDeUsuario;
 
 public class AltaForm extends JDialog implements ActionListener {
 
-	private static int MAX_LENGHT = 40;
+	private static int MAX_LENGHT = 20;
 	private static final long serialVersionUID = 1L;
 	private JTextField nombreUsuario;
 	private JTextField nombre;
@@ -28,7 +30,6 @@ public class AltaForm extends JDialog implements ActionListener {
 	private JPasswordField contraseña;
 	private JPasswordField repContraseña;
 	private JTextField direccionWeb;
-	// private JFileChooser foto;
 	private ButtonGroup publico;
 	JRadioButton perfilPub;
 	JRadioButton perfilNoPub;
@@ -36,9 +37,6 @@ public class AltaForm extends JDialog implements ActionListener {
 	private Menu menu;
 
 	private JButton registrar;
-	private JButton abrirArchivo;
-
-	// private File archivo;
 
 	private App owner;
 
@@ -55,8 +53,6 @@ public class AltaForm extends JDialog implements ActionListener {
 		contraseña = new JPasswordField(MAX_LENGHT);
 		repContraseña = new JPasswordField(MAX_LENGHT);
 		direccionWeb = new JTextField(MAX_LENGHT);
-		// foto = new JFileChooser();
-		// abrirArchivo = new JButton("Abrir Archivo");
 		publico = new ButtonGroup();
 		perfilPub = new JRadioButton("publico", true);
 		perfilNoPub = new JRadioButton("no publico");
@@ -96,13 +92,6 @@ public class AltaForm extends JDialog implements ActionListener {
 		p.add(direccionWeb);
 		panelCentral.add(p);
 
-		// p = new JPanel();
-		// p.add(new JLabel("Foto"));
-		// p.add(foto);
-		// abrirArchivo.addActionListener(this);
-		// p.add(abrirArchivo);
-		// panelCentral.add(p);
-
 		p = new JPanel();
 		p.add(new JLabel("Como quiere que sea su perfil"));
 		p.add(perfilPub);
@@ -120,7 +109,8 @@ public class AltaForm extends JDialog implements ActionListener {
 
 		panelPrinciapal.add(panelCentral);
 		add(panelPrinciapal);
-		pack();
+		setResizable(false);
+		setPreferredSize(new Dimension(400, 400));
 		setSize(getPreferredSize());
 		setVisible(true);
 
@@ -129,28 +119,27 @@ public class AltaForm extends JDialog implements ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		try {
-			if (e.getSource() == abrirArchivo)
-				handleAbrirArchivo();
 
-			else if (e.getSource() == registrar) {
+			if (e.getSource() == registrar) {
 				handleRegistrar();
 			}
 
-		} catch (NullPointerException e1) {
-			System.out.println("NULL POINTER EXCEPTION");
-			return;
 		} catch (RemoteException e1) {
-			System.out.println("REMOTE EXCEPTION");
+			new ErrorDialog(owner,
+					"Se ha producido un error, intentelo nuevamente en unos minutos");
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 
 	}
 
-	private void handleRegistrar() throws RemoteException {
+	private void handleRegistrar() throws IOException {
 		if (!contraseña.getText().equals(repContraseña.getText())) {
 			return;
 		}
 		if (sesion.existeUsuario(nombreUsuario.getText())) {
+			new ErrorDialog(owner, "Ya existe un usuario con ese nombre");
 			return;
 		}
 		sesion.registrarse(nombreUsuario.getText(), contraseña.getText(),
@@ -166,7 +155,4 @@ public class AltaForm extends JDialog implements ActionListener {
 		return;
 	}
 
-	private void handleAbrirArchivo() {
-		// archivo = foto.getSelectedFile();
-	}
 }

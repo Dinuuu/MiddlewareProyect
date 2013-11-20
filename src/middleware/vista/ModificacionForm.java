@@ -1,6 +1,7 @@
 package middleware.vista;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.rmi.RemoteException;
@@ -20,7 +21,7 @@ import middleware.rmi.interfaces.ManagerDeUsuario;
 public class ModificacionForm extends JDialog implements ActionListener {
 
 	private static final long serialVersionUID = 1L;
-	private static int MAX_LENGHT = 40;
+	private static int MAX_LENGHT = 20;
 
 	private JTextField nombreUsuario;
 	private JTextField nombre;
@@ -34,13 +35,15 @@ public class ModificacionForm extends JDialog implements ActionListener {
 
 	ManagerDeSesion sesion;
 	ManagerDeUsuario usu;
+	App parent;
 
-	public ModificacionForm(JFrame parent, ManagerDeUsuario usu,
+	public ModificacionForm(App parent, ManagerDeUsuario usu,
 			ManagerDeSesion sesion) throws RemoteException {
 
 		super(parent, "Cambio de Información", true);
 		this.sesion = sesion;
 		this.usu = usu;
+		this.parent = parent;
 		registrar = new JButton("Modificar Informacion");
 		nombreUsuario = new JTextField(usu.getNombreUsuario(), MAX_LENGHT);
 		nombre = new JTextField(usu.getNombre(), MAX_LENGHT);
@@ -95,33 +98,36 @@ public class ModificacionForm extends JDialog implements ActionListener {
 
 		this.add(panelPrincipal);
 
-		pack();
+		setPreferredSize(new Dimension(400, 450));
 		setSize(getPreferredSize());
 		setVisible(true);
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
+
 		try {
 			if (!nombreUsuario.getText().equals(usu.getNombreUsuario())
 					&& sesion.existeUsuario(nombreUsuario.getText()))
 				return;
 			String nombreViejo = usu.getNombreUsuario();
-			boolean cambio = usu.cambiarDatos(nombre.getText(),
-					apellido.getText(), direccionWeb.getText(),
-					perfilPub.isSelected(), nombreUsuario.getText(), sesion);
+			boolean cambio;
+			cambio = usu.cambiarDatos(nombre.getText(), apellido.getText(),
+					direccionWeb.getText(), perfilPub.isSelected(),
+					nombreUsuario.getText(), sesion);
 			if (cambio)
 				sesion.cambiarNombreUsuario(nombreViejo,
 						nombreUsuario.getText());
 			setVisible(false);
 			dispose();
 			return;
-
-		} catch (NullPointerException e2) {
-			return;
-
 		} catch (RemoteException e1) {
-			e1.printStackTrace();
+			new ErrorDialog(parent,
+					"Se ha producido un error, intentelo nuevamente en unos minutos");
+		} catch (NullPointerException e2) {
+
+			new ErrorDialog(parent, "Ingrese todos los campos obligatorios");
+
 		}
 
 	}

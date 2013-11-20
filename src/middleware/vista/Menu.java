@@ -1,14 +1,22 @@
 package middleware.vista;
 
+import java.awt.CardLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.rmi.RemoteException;
 
+import javax.imageio.ImageIO;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import middleware.rmi.interfaces.Buscador;
@@ -26,6 +34,8 @@ public class Menu extends JMenuBar implements ActionListener {
 	private JMenuItem desconectarse;
 	private JMenuItem salir;
 	private JMenuItem editarInformacion;
+	private JMenuItem editarContraseña;
+	private JMenuItem cambiarFoto;
 	private JMenuItem ir;
 	private JMenuItem misSolicitudes;
 	private JMenuItem enviarSolicitud;
@@ -67,21 +77,32 @@ public class Menu extends JMenuBar implements ActionListener {
 		file.add(salir);
 
 		JMenu perfil = new JMenu("Perfil");
-		editarInformacion = new JMenuItem("Editar Informacion...");
+		editarInformacion = new JMenuItem("Editar Informacion ...");
 		editarInformacion.addActionListener(this);
 		editarInformacion.setEnabled(false);
+
+		cambiarFoto = new JMenuItem("Cambiar Foto ...");
+		cambiarFoto.addActionListener(this);
+		cambiarFoto.setEnabled(false);
+
+		editarContraseña = new JMenuItem("Editar Contraseña ...");
+		editarContraseña.addActionListener(this);
+		editarContraseña.setEnabled(false);
 
 		ir = new JMenuItem("Ir a mi perfil");
 		ir.addActionListener(this);
 		ir.setEnabled(false);
 
 		perfil.add(editarInformacion);
+		perfil.add(cambiarFoto);
+		perfil.add(editarContraseña);
 		perfil.addSeparator();
 		perfil.add(ir);
 
 		JMenu ultimasNoticias = new JMenu("Ultimas Noticias");
 		irAUltimas = new JMenuItem("ir");
 		irAUltimas.setEnabled(false);
+		irAUltimas.addActionListener(this);
 
 		ultimasNoticias.add(irAUltimas);
 
@@ -140,56 +161,120 @@ public class Menu extends JMenuBar implements ActionListener {
 				handleBusqueda();
 			else if (source == enviarSolicitud)
 				handleEnviarSolicitud();
+			else if (source == editarContraseña)
+				handleEdicionContraseña();
+			else if (source == cambiarFoto)
+				handleCambiarFoto();
 			else
 				System.out.println("ME OLVIDE DE ALGUNO");
 		} catch (RemoteException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			new ErrorDialog(parent,
+					"Se ha producido un error, intentelo nuevamente en unos minutos");
+
+		} catch (IOException e1) {
+			new ErrorDialog(parent, "Todos los campos son obligatorios");
 		}
+	}
+
+	private void handleCambiarFoto() throws IOException {
+
+		File currentDir = new File(System.getProperty("user.dir"));
+		JFileChooser fc = new JFileChooser(currentDir);
+		fc.setMultiSelectionEnabled(false);
+		ImgFilter filtro = new ImgFilter();
+		fc.setFileFilter(filtro);
+
+		if (fc.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+			File f = fc.getSelectedFile();
+			if (f != null) {
+
+				parent.getUsu().cambiarFoto(f);
+				Perfil perfil = (Perfil) parent.getCards().get("PERFIL");
+				perfil.modificar(usuarioConectado);
+
+			}
+
+		}
+	}
+
+	private void handleEdicionContraseña() {
+
+		new CambioContraseñaForm(parent, usuarioConectado);
 	}
 
 	private void handleEnviarSolicitud() {
 		new EnviarSolicitudDialog(parent, sesion, usuarioConectado);
 	}
 
-	private void handleBusqueda() throws RemoteException {
+	private void handleBusqueda() throws IOException {
 		ManagerDeUsuario usu = buscador.buscar(nombreUsuario.getText());
-		new Perfil(parent, usu);
+
+		if (usu != null) {
+			Perfil perfilBusqueda = new Perfil(parent, usu);
+
+			parent.getContentPane().add(perfilBusqueda, "BUSQUEDA");
+			CardLayout cl = (CardLayout) parent.getContentPane().getLayout();
+			cl.show(parent.getContentPane(), "BUSQUEDA");
+			parent.getCards().remove("BUSQUEDA");
+			parent.getCards().put("BUSQUEDA", perfilBusqueda);
+		} else
+			new ErrorDialog(parent, "El usuario seleccionado no existe");
 
 	}
 
-	private void handleUltimasNoticias() {
-		// TODO Auto-generated method stub
+	private void handleUltimasNoticias() throws RemoteException {
+		Perfil perfil = (Perfil) parent.getCards().get("PERFIL");
+
+		UltimasNoticias ultimasNoticias = new UltimasNoticias(parent,
+				perfil.getInfoUsuario());
+
+		parent.getContentPane().add(ultimasNoticias, "ULTIMASNOTICIAS");
+		CardLayout cl = (CardLayout) parent.getContentPane().getLayout();
+		cl.show(parent.getContentPane(), "ULTIMASNOTICIAS");
+		parent.getCards().put("ULTIMASNOTICIAS", ultimasNoticias);
 
 	}
 
 	private void handleSolicitudes() throws RemoteException {
 
-		parent.getContentPane().add(new MisSolicitudes(usuarioConectado));
+		MisSolicitudes solici = new MisSolicitudes(usuarioConectado);
+
+		parent.getContentPane().add(solici, "MISSOLICITUDES");
+		CardLayout cl = (CardLayout) parent.getContentPane().getLayout();
+		cl.show(parent.getContentPane(), "MISSOLICITUDES");
+		parent.getCards().put("MISSOLICITUDES", solici);
 
 	}
 
 	private void handlePerfil() throws RemoteException {
 
-		new Perfil(parent, usuarioConectado);
+		CardLayout cl = (CardLayout) parent.getContentPane().getLayout();
+		cl.show(parent.getContentPane(), "PERFIL");
 
 	}
 
-	private void handleEdicionInformacion() throws RemoteException {
+	private void handleEdicionInformacion() throws IOException {
 
 		new ModificacionForm(parent, usuarioConectado, sesion);
+		Perfil perfil = (Perfil) parent.getCards().get("PERFIL");
+		perfil.modificar(usuarioConectado);
 
 	}
 
 	private void handleSalir() throws RemoteException {
 
-		sesion.desconectarse(usuarioConectado);
+		if (usuarioConectado != null)
+			sesion.desconectarse(usuarioConectado);
 		System.exit(0);
 
 	}
 
 	private void handleDesconeccion() throws RemoteException {
 
+		CardLayout cl = (CardLayout) parent.getContentPane().getLayout();
+		cl.show(parent.getContentPane(), "DESCONECTADO");
+
+		validate();
 		sesion.desconectarse(usuarioConectado);
 		setUsuario(null);
 		parent.setUsu(null);
@@ -197,12 +282,38 @@ public class Menu extends JMenuBar implements ActionListener {
 
 	}
 
-	private void handleConeccion() {
+	private void handleConeccion() throws IOException {
 		new ConeccionForm(parent, sesion, this);
+		if (usuarioConectado != null) {
+			JPanel perfil = new Perfil(parent, usuarioConectado);
+
+			parent.getContentPane().add(perfil, "PERFIL");
+			CardLayout cl = (CardLayout) parent.getContentPane().getLayout();
+			cl.show(parent.getContentPane(), "PERFIL");
+			parent.getCards().put("PERFIL", perfil);
+
+			JPanel desconeccion = new JPanel();
+			parent.getContentPane().add(desconeccion, "DESCONECTADO");
+			parent.getCards().put("DESCONECTADO", desconeccion);
+		}
+
 	}
 
-	private void handleRegistro() {
+	private void handleRegistro() throws IOException {
 		new AltaForm(parent, sesion, this);
+		if (usuarioConectado != null) {
+
+			JPanel perfil = new Perfil(parent, usuarioConectado);
+
+			parent.getContentPane().add(perfil, "PERFIL");
+			CardLayout cl = (CardLayout) parent.getContentPane().getLayout();
+			cl.show(parent.getContentPane(), "PERFIL");
+			parent.getCards().put("PERFIL", perfil);
+
+			JPanel desconeccion = new JPanel();
+			parent.getContentPane().add(desconeccion, "DESCONECTADO");
+			parent.getCards().put("DESCONECTADO", desconeccion);
+		}
 	}
 
 	void changeButtonStatus() {
@@ -214,5 +325,7 @@ public class Menu extends JMenuBar implements ActionListener {
 		misSolicitudes.setEnabled(!misSolicitudes.isEnabled());
 		enviarSolicitud.setEnabled(!enviarSolicitud.isEnabled());
 		irAUltimas.setEnabled(!irAUltimas.isEnabled());
+		editarContraseña.setEnabled(!editarContraseña.isEnabled());
+		cambiarFoto.setEnabled(!cambiarFoto.isEnabled());
 	}
 }

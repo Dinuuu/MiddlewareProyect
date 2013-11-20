@@ -1,5 +1,6 @@
 package middleware.rmi.interfaces;
 
+import java.io.File;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.List;
@@ -44,11 +45,24 @@ public interface ManagerDeUsuario extends Remote {
 
 	public boolean isPublico() throws RemoteException;
 
-	public byte[] getFoto() throws RemoteException;
+	public File getFoto() throws RemoteException;
+
+	public boolean existeSolicitud(ManagerDeUsuario usuario)
+			throws RemoteException;
+
+	public void añadirSolicitud(Solicitud solici) throws RemoteException;
 
 	public String getDireccionWeb() throws RemoteException;
 
 	public List<ManagerDeUsuario> getAmigos() throws RemoteException;
 
 	public void declinarSolicitud(Solicitud s) throws RemoteException;
+
+	public void cambiarFoto(File bimg) throws RemoteException;
+
+	public void agregarAmigo(ManagerDeUsuario usu) throws RemoteException;
+
+	public void eliminarSolicitud(Solicitud s) throws RemoteException;
+
+	public void añadirPublicacion(Publicacion pub) throws RemoteException;
 }

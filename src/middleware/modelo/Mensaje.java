@@ -1,21 +1,26 @@
 package middleware.modelo;
 
+import java.io.Serializable;
 import java.sql.Timestamp;
 
-public class Mensaje implements Comparable<Mensaje> {
+import middleware.rmi.interfaces.ManagerDeUsuario;
 
-	private Usuario usu;
+public class Mensaje implements Comparable<Mensaje>, Serializable {
+
+	private static final long serialVersionUID = 1L;
+	private ManagerDeUsuario usu;
 	private String mensaje;
 	private Timestamp horaDePublicacion;
 
-	public Mensaje(Usuario usu, String mensaje, Timestamp horaDePublicacion) {
+	public Mensaje(ManagerDeUsuario usu, String mensaje,
+			Timestamp horaDePublicacion) {
 		super();
 		this.usu = usu;
 		this.mensaje = mensaje;
 		this.horaDePublicacion = horaDePublicacion;
 	}
 
-	public Usuario getUsu() {
+	public ManagerDeUsuario getUsu() {
 		return usu;
 	}
 
@@ -29,6 +34,6 @@ public class Mensaje implements Comparable<Mensaje> {
 
 	@Override
 	public int compareTo(Mensaje o) {
-		return horaDePublicacion.compareTo(o.horaDePublicacion);
+		return o.horaDePublicacion.compareTo(horaDePublicacion);
 	}
 }

@@ -1,13 +1,13 @@
 package middleware.vista;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.rmi.RemoteException;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
@@ -17,9 +17,12 @@ import middleware.rmi.interfaces.ManagerDeSesion;
 import middleware.rmi.interfaces.ManagerDeUsuario;
 
 public class ConeccionForm extends JDialog implements ActionListener {
-	private static int MAX_LENGHT = 40;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private static int MAX_LENGHT = 20;
 	private Menu menu;
-	// private JFrame parent;
 	private ManagerDeSesion sesion;
 	private JTextField nombreDeUsuario;
 	private JPasswordField contraseña;
@@ -30,7 +33,6 @@ public class ConeccionForm extends JDialog implements ActionListener {
 	public ConeccionForm(App parent, ManagerDeSesion sesion, Menu menu) {
 		super(parent, "Conectarse", true);
 		this.menu = menu;
-		// this.parent = parent;
 		this.sesion = sesion;
 		this.parent = parent;
 		nombreDeUsuario = new JTextField(MAX_LENGHT);
@@ -56,7 +58,9 @@ public class ConeccionForm extends JDialog implements ActionListener {
 
 		panelPrincipal.add(panelCentral);
 		add(panelPrincipal);
-		pack();
+
+		setResizable(false);
+		setPreferredSize(new Dimension(400, 200));
 		setSize(getPreferredSize());
 
 		setVisible(true);
@@ -77,11 +81,13 @@ public class ConeccionForm extends JDialog implements ActionListener {
 				dispose();
 				return;
 			} else
-				return;
+				new ErrorDialog(parent,
+						"El usuario o contraseña ingresada son incorrectos");
 
 		} catch (RemoteException e) {
+			new ErrorDialog(parent,
+					"Se ha producido un error, intentelo nuevamente en unos minutos");
 
-			e.printStackTrace();
 		}
 	}
 

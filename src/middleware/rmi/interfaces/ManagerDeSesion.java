@@ -1,5 +1,6 @@
 package middleware.rmi.interfaces;
 
+import java.io.IOException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 
@@ -9,7 +10,7 @@ public interface ManagerDeSesion extends Remote {
 
 	public boolean registrarse(String nombreUsuario, String contraseña,
 			String nombre, String apellido, String direccionWeb, boolean publico)
-			throws RemoteException;
+			throws RemoteException, IOException;
 
 	public ManagerDeUsuario conectarse(String nombreUsu, String contraseña)
 			throws RemoteException;
@@ -21,6 +22,6 @@ public interface ManagerDeSesion extends Remote {
 	public ManagerDeUsuario getUsuario(String nombreUsuario)
 			throws RemoteException;
 
-	public void cambiarNombreUsuario(String nombreUsuarioViejo,
+	public boolean cambiarNombreUsuario(String nombreUsuarioViejo,
 			String nombreUsuarioNuevo) throws RemoteException;
 }
