@@ -11,11 +11,15 @@ import middleware.vista.App;
 
 public class Cliente {
 	public static void main(String[] args) {
+		if (args.length != 1) {
+			System.out.println("Se debe ingresar la direccion del Servidor");
+			return;
+		}
 		try {
 			Registry registro;
-			registro = LocateRegistry.getRegistry();
+			registro = LocateRegistry.getRegistry(args[0], 1099);
 			ManagerDeSesion stubSesion = (ManagerDeSesion) registro
-					.lookup("ManagerDeSesion");	
+					.lookup("ManagerDeSesion");
 
 			Buscador stubBuscador = (Buscador) registro.lookup("Buscador");
 
