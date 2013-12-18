@@ -11,8 +11,8 @@ import middleware.vista.App;
 
 public class Cliente {
 	public static void main(String[] args) {
-		Registry registro;
 		try {
+			Registry registro;
 			registro = LocateRegistry.getRegistry();
 			ManagerDeSesion stubSesion = (ManagerDeSesion) registro
 					.lookup("ManagerDeSesion");	

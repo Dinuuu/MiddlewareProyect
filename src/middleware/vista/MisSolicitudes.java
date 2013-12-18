@@ -33,7 +33,6 @@ public class MisSolicitudes extends JPanel implements ActionListener,
 		super();
 		this.usu = usu;
 		solicitudes = usu.getSolicitudes();
-		System.out.println(solicitudes.size());
 		JPanel panelCentral = new JPanel(new GridLayout(0, 1));
 
 		JPanel p;

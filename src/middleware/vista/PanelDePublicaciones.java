@@ -10,8 +10,9 @@ import javax.swing.JScrollPane;
 
 import middleware.modelo.Publicacion;
 import middleware.rmi.interfaces.ManagerDeUsuario;
+import middleware.vista.interfaz.EventListener;
 
-public class PanelDePublicaciones extends JScrollPane {
+public class PanelDePublicaciones extends JScrollPane implements EventListener {
 
 	private static final long serialVersionUID = 1L;
 	JPanel panelCentral;
@@ -45,6 +46,14 @@ public class PanelDePublicaciones extends JScrollPane {
 		panelCentral.add(panel, 0);
 
 		validate();
+
+	}
+
+	@Override
+	public void notify(String mensaje, ManagerDeUsuario usu)
+			throws RemoteException {
+
+		agregarPublicacion(mensaje, usu);
 
 	}
 }

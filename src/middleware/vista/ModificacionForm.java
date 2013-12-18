@@ -107,6 +107,13 @@ public class ModificacionForm extends JDialog implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
 
 		try {
+
+			if (nombreUsuario.getText().equals("")
+					|| nombre.getText().equals("")
+					|| apellido.getText().equals("")
+					|| direccionWeb.getText().equals(""))
+				throw new NullPointerException();
+
 			if (!nombreUsuario.getText().equals(usu.getNombreUsuario())
 					&& sesion.existeUsuario(nombreUsuario.getText()))
 				return;

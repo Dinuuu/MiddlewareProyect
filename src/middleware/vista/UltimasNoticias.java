@@ -19,6 +19,7 @@ public class UltimasNoticias extends JPanel {
 	private static final long serialVersionUID = 1L;
 	SortedSet<Publicacion> publicaciones;
 	PanelInfoUsuario infoUsuario;
+	PanelDePublicaciones pubs;
 
 	public UltimasNoticias(App parent, PanelInfoUsuario infousuario)
 			throws RemoteException {
@@ -36,8 +37,7 @@ public class UltimasNoticias extends JPanel {
 		}
 		panelPrincipal.add(infoUsuario, BorderLayout.WEST);
 
-		PanelDePublicaciones pubs = new PanelDePublicaciones(publicaciones);
-
+		pubs = new PanelDePublicaciones(publicaciones);
 		panelCentral.add(new JLabel("Ultimas Noticias"), BorderLayout.NORTH);
 		panelCentral.add(pubs);
 		panelPrincipal.add(panelCentral);
@@ -46,6 +46,7 @@ public class UltimasNoticias extends JPanel {
 
 		setSize(getPreferredSize());
 		setVisible(true);
+		parent.getUsu().setListener(pubs);
 
 	}
 }

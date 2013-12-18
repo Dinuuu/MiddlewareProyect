@@ -12,6 +12,7 @@ import java.util.TreeSet;
 
 import middleware.rmi.interfaces.ManagerDeSesion;
 import middleware.rmi.interfaces.ManagerDeUsuario;
+import middleware.vista.interfaz.EventListener;
 
 public class Usuario implements Serializable, ManagerDeUsuario {
 
@@ -29,6 +30,7 @@ public class Usuario implements Serializable, ManagerDeUsuario {
 	private File foto;
 	private SortedSet<Publicacion> publicaciones = new TreeSet<Publicacion>();
 	private boolean publico;
+	private EventListener e;
 
 	public Usuario(String nombreUsuario, String contraseña, String nombre,
 			String apellido, String direccionWeb, boolean publico)
@@ -204,6 +206,9 @@ public class Usuario implements Serializable, ManagerDeUsuario {
 		}
 		usu.añadirPublicacion(new Publicacion(this, mensaje, new Timestamp(
 				System.currentTimeMillis())));
+		for (ManagerDeUsuario u : amigos) {
+			u.notify(mensaje, usu);
+		}
 		return true;
 	}
 
@@ -259,5 +264,19 @@ public class Usuario implements Serializable, ManagerDeUsuario {
 	public void eliminarSolicitud(Solicitud s) throws RemoteException {
 
 		solicitudes.remove(s);
+	}
+
+	@Override
+	public void setListener(EventListener e) throws RemoteException {
+		this.e = e;
+
+	}
+
+	@Override
+	public void notify(String mensaje, ManagerDeUsuario usu)
+			throws RemoteException {
+		if (e != null) {
+			e.notify(mensaje, usu);
+		}
 	}
 }

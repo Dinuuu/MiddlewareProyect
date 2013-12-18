@@ -1,0 +1,19 @@
+Para ejecutarlo pararse en el directorio MiddlewareProyect/bin 
+luego ejecutar rmiregistry & para iniciar el servicio, luego el servidor
+
+ java middleware.rmi.Servidor & 
+
+y para comenzar con un poco de datos ya insertados
+
+ java middleware.rmi.IniciadorDeDatos
+
+este programa creara el usuario Rafa con contraseña asd que es amigo del usuario Dinu ( perfil privado ) que tiene contraseña contraseña asd y por ultimo el usuario Rodri con contraseña asd
+
+y luego el cliente mediante
+
+ java middleware.rmi.Cliente
+
+
+P.D: Para Enero mejoro la interfaz grafica.
+
+

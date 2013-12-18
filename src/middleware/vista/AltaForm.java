@@ -128,13 +128,22 @@ public class AltaForm extends JDialog implements ActionListener {
 			new ErrorDialog(owner,
 					"Se ha producido un error, intentelo nuevamente en unos minutos");
 		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			new ErrorDialog(owner, "Ingrese todos los datos obligatorios");
+		} catch (NullPointerException e1) {
+			new ErrorDialog(owner, "Ingrese todos los datos obligatorios");
 		}
 
 	}
 
 	private void handleRegistrar() throws IOException {
+
+		if (nombreUsuario.getText().equals("") || nombre.getText().equals("")
+				|| apellido.getText().equals("")
+				|| direccionWeb.getText().equals("")
+				|| contraseña.getText().equals("")
+				|| repContraseña.getText().equals(" "))
+			throw new NullPointerException();
+
 		if (!contraseña.getText().equals(repContraseña.getText())) {
 			return;
 		}

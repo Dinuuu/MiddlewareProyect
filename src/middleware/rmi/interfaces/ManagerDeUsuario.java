@@ -8,8 +8,9 @@ import java.util.SortedSet;
 
 import middleware.modelo.Publicacion;
 import middleware.modelo.Solicitud;
+import middleware.vista.interfaz.EventListener;
 
-public interface ManagerDeUsuario extends Remote {
+public interface ManagerDeUsuario extends Remote, EventListener {
 
 	public boolean peticionAmistad(ManagerDeUsuario usu) throws RemoteException;
 
@@ -65,4 +66,7 @@ public interface ManagerDeUsuario extends Remote {
 	public void eliminarSolicitud(Solicitud s) throws RemoteException;
 
 	public void añadirPublicacion(Publicacion pub) throws RemoteException;
+
+	public void setListener(EventListener e) throws RemoteException;
+
 }

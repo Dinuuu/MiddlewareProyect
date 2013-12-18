@@ -250,6 +250,7 @@ public class Menu extends JMenuBar implements ActionListener {
 
 		CardLayout cl = (CardLayout) parent.getContentPane().getLayout();
 		cl.show(parent.getContentPane(), "PERFIL");
+		validate();
 
 	}
 

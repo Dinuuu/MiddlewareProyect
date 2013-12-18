@@ -65,6 +65,11 @@ public class CambioContraseñaForm extends JDialog implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
 		try {
 
+			if (contraseña.getText().equals("")
+					|| repContraseña.getText().equals("")
+					|| contraseñaVieja.getText().equals(""))
+				throw new NullPointerException();
+
 			if (!contraseña.getText().equals(repContraseña.getText())
 					|| !contraseñaVieja.getText().equals(usu.getContraseña())) {
 				new ErrorDialog(parent, "Las contraseñas no coinciden");

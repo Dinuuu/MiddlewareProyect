@@ -51,7 +51,6 @@ public class Perfil extends JPanel implements ActionListener {
 				|| (owner.getUsu() == null ? false : usu.getNombreUsuario()
 						.equals(owner.getUsu().getNombreUsuario()) ? true : usu
 						.esAmigo(owner.getUsu())));
-		System.out.println(panelDePubs.isVisible());
 		panelCentral.add(panelDePubs);
 
 		infoUsuario = new PanelInfoUsuario(usu);
