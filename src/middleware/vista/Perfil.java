@@ -86,9 +86,11 @@ public class Perfil extends JPanel implements ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		try {
-			usu.escribirPublicacion(publicacion.getText(), usu);
-			publicaciones.agregarPublicacion(publicacion.getText(), usu);
-
+			if (!publicacion.getText().equals("")) {
+				usu.escribirPublicacion(publicacion.getText(), usu);
+				publicaciones.agregarPublicacion(publicacion.getText(), usu);
+				publicacion.setText("");
+			}
 		} catch (RemoteException e1) {
 
 			new ErrorDialog(owner,

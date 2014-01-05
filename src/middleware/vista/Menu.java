@@ -4,18 +4,15 @@ import java.awt.CardLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.rmi.RemoteException;
 
-import javax.imageio.ImageIO;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
@@ -222,11 +219,10 @@ public class Menu extends JMenuBar implements ActionListener {
 
 	}
 
-	private void handleUltimasNoticias() throws RemoteException {
+	private void handleUltimasNoticias() throws IOException {
 		Perfil perfil = (Perfil) parent.getCards().get("PERFIL");
 
-		UltimasNoticias ultimasNoticias = new UltimasNoticias(parent,
-				perfil.getInfoUsuario());
+		UltimasNoticias ultimasNoticias = new UltimasNoticias(parent);
 
 		parent.getContentPane().add(ultimasNoticias, "ULTIMASNOTICIAS");
 		CardLayout cl = (CardLayout) parent.getContentPane().getLayout();
@@ -259,6 +255,9 @@ public class Menu extends JMenuBar implements ActionListener {
 		new ModificacionForm(parent, usuarioConectado, sesion);
 		Perfil perfil = (Perfil) parent.getCards().get("PERFIL");
 		perfil.modificar(usuarioConectado);
+		UltimasNoticias ultimas = (UltimasNoticias) parent.getCards().get(
+				"ULTIMASNOTICIAS");
+		ultimas.modificar(usuarioConectado);
 
 	}
 

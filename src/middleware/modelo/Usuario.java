@@ -41,7 +41,7 @@ public class Usuario implements Serializable, ManagerDeUsuario {
 		this.nombre = nombre;
 		this.apellido = apellido;
 		this.direccionWeb = direccionWeb;
-		this.foto = new File("./default.jpg");
+		this.foto = new File("./default.jpeg");
 		this.publico = publico;
 	}
 

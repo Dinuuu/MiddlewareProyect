@@ -1,9 +1,7 @@
 package middleware.vista;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
 import java.io.IOException;
-import java.rmi.RemoteException;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;

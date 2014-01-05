@@ -9,9 +9,7 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import middleware.rmi.interfaces.Buscador;
 import middleware.rmi.interfaces.ManagerDeSesion;

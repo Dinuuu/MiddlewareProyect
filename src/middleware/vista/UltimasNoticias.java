@@ -1,7 +1,7 @@
 package middleware.vista;
 
 import java.awt.BorderLayout;
-import java.rmi.RemoteException;
+import java.io.IOException;
 import java.util.List;
 import java.util.SortedSet;
 
@@ -21,10 +21,9 @@ public class UltimasNoticias extends JPanel {
 	PanelInfoUsuario infoUsuario;
 	PanelDePublicaciones pubs;
 
-	public UltimasNoticias(App parent, PanelInfoUsuario infousuario)
-			throws RemoteException {
+	public UltimasNoticias(App parent) throws IOException {
 		super();
-		this.infoUsuario = infousuario;
+		this.infoUsuario = new PanelInfoUsuario(parent.getUsu());
 		JPanel panelPrincipal = new JPanel(new BorderLayout());
 		JPanel panelCentral = new JPanel(new BorderLayout());
 		ManagerDeUsuario usu = parent.getUsu();
@@ -48,5 +47,9 @@ public class UltimasNoticias extends JPanel {
 		setVisible(true);
 		parent.getUsu().setListener(pubs);
 
+	}
+
+	public void modificar(ManagerDeUsuario usuarioConectado) throws IOException {
+		infoUsuario.modificar(usuarioConectado);
 	}
 }
