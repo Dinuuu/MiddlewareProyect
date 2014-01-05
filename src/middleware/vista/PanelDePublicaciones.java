@@ -46,13 +46,15 @@ public class PanelDePublicaciones extends JScrollPane implements EventListener {
 		panelCentral.add(panel, 0);
 
 		validate();
+		repaint();
+		revalidate();
 
 	}
 
 	@Override
 	public void notify(String mensaje, ManagerDeUsuario usu)
 			throws RemoteException {
-
+		System.out.println("ENTRO");
 		agregarPublicacion(mensaje, usu);
 
 	}

@@ -276,7 +276,9 @@ public class Usuario implements Serializable, ManagerDeUsuario {
 	public void notify(String mensaje, ManagerDeUsuario usu)
 			throws RemoteException {
 		if (e != null) {
+			System.out.println("NO ES NULLLL");
 			e.notify(mensaje, usu);
-		}
+		} else
+			System.out.println("ES NULLLL");
 	}
 }
